@@ -215,9 +215,9 @@ void SDMMCAnalyzer::ReadCommandBit(CommandReadState *state, DataReadState
 			state->cmd_crc_cnt++;
 			return;
 		case CMD_STOP:
-			mResults->AddMarker(mClock->GetSampleNumber(),
-					AnalyzerResults::Stop, mSettings.mCommandChannel);
-			if (mSettings.mProtocol == PROTOCOL_MMC) {
+			{
+                        	mResults->AddMarker(mClock->GetSampleNumber(),
+                                              AnalyzerResults::Stop, mSettings.mCommandChannel);
 				struct MMCResponse response = SDMMCHelpers::MMCCommandResponse(state->cmdindex);
 				if (response.mType != MMC_RSP_NONE) {
 					state->phase = RESP_INIT;
@@ -234,9 +234,6 @@ void SDMMCAnalyzer::ReadCommandBit(CommandReadState *state, DataReadState
 				} else {
 					state->phase = CMD_END;
 				}
-			} else {
-				/* FIXME: implement SD response handling */
-				state->phase = CMD_END;
 			}
 			return;
 		case RESP_INIT:
