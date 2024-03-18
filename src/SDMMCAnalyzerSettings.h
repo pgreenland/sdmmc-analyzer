@@ -48,19 +48,19 @@ public:
 	enum SDMMCSampleEdge mSampleEdge;
 
 protected:
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mClockChannelInterface;
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mCommandChannelInterface;
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface0;
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface1;
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface2;
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface3;
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface4;
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface5;
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface6;
-	std::auto_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface7;
-	std::auto_ptr<AnalyzerSettingInterfaceNumberList> mProtocolInterface;
-	std::auto_ptr<AnalyzerSettingInterfaceNumberList> mBusWidthInterface;
-	std::auto_ptr<AnalyzerSettingInterfaceNumberList> mSampleEdgeInterface;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mClockChannelInterface;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mCommandChannelInterface;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface0;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface1;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface2;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface3;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface4;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface5;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface6;
+	std::unique_ptr<AnalyzerSettingInterfaceChannel> mDataChannelInterface7;
+	std::unique_ptr<AnalyzerSettingInterfaceNumberList> mProtocolInterface;
+	std::unique_ptr<AnalyzerSettingInterfaceNumberList> mBusWidthInterface;
+	std::unique_ptr<AnalyzerSettingInterfaceNumberList> mSampleEdgeInterface;
 };
 
 #endif

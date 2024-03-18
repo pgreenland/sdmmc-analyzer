@@ -81,7 +81,7 @@ struct MMCResponse
 
 struct MMCCommand
 {
-	char *desc;
+	const char *desc;
 };
 
 class SDMMCHelpers

@@ -439,15 +439,15 @@ void SDMMCAnalyzer::ReadDataBit(DataReadState *state, struct Frame *frame) {
 			frame->mData1 <<= 1;
 			frame->mData1 |= (mData0->GetBitState());
 			if (mSettings.mBusWidth != BUS_WIDTH_1) { /* BusWidth=4 or 8 */
-				frame->mData1 |= (mData1->GetBitState() << 16);
-				frame->mData1 |= (mData2->GetBitState() << 32);
-				frame->mData1 |= (mData3->GetBitState() << 48);
+				frame->mData1 |= (static_cast<U64>(mData1->GetBitState()) << 16);
+				frame->mData1 |= (static_cast<U64>(mData2->GetBitState()) << 32);
+				frame->mData1 |= (static_cast<U64>(mData3->GetBitState()) << 48);
 			}
 			if (mSettings.mBusWidth == BUS_WIDTH_8) { /* BusWidth=8 */
-				frame->mData2 |= (mData4->GetBitState() << 16);
-				frame->mData2 |= (mData5->GetBitState() << 16);
-				frame->mData2 |= (mData6->GetBitState() << 32);
-				frame->mData2 |= (mData7->GetBitState() << 48);
+				frame->mData2 |= (static_cast<U64>(mData4->GetBitState()) << 16);
+				frame->mData2 |= (static_cast<U64>(mData5->GetBitState()) << 16);
+				frame->mData2 |= (static_cast<U64>(mData6->GetBitState()) << 32);
+				frame->mData2 |= (static_cast<U64>(mData7->GetBitState()) << 48);
 			}
 			if (state->crc_cnt == 15) {
 				frame->mEndingSampleInclusive = mClock->GetSampleNumber();

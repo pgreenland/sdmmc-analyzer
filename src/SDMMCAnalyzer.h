@@ -32,7 +32,7 @@ protected:
 
 protected:
 	SDMMCAnalyzerSettings mSettings;
-	std::auto_ptr<SDMMCAnalyzerResults> mResults;
+	std::unique_ptr<SDMMCAnalyzerResults> mResults;
 
 	SDMMCSimulationDataGenerator mDataGenerator;
 	bool mSimulationInitialized;
