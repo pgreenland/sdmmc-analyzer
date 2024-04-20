@@ -71,7 +71,7 @@ static struct MMCResponse invalid_response = {
 	MMC_RSP_NONE,  0,   0, false, false
 };
 
-struct MMCResponse SDMMCHelpers::MMCCommandResponse(unsigned int index)
+struct MMCResponse SDMMCHelpers::MMCCommandResponse(U64 index)
 {
 	if (index > 63)
 		return invalid_response;
@@ -153,7 +153,7 @@ static struct MMCCommand invalid_response_cmd = {
 	"_INVALID_"
 };
 
-const char * SDMMCHelpers::MMCCommandDescription(unsigned int index, unsigned int args)
+const char * SDMMCHelpers::MMCCommandDescription(U64 index, U64 args)
 {
 	if (index > 63)
 		return invalid_response_cmd.desc;
@@ -214,9 +214,8 @@ static unsigned char crc7_table[256] = {
 U8 SDMMCHelpers::crc7(const U8 *data, unsigned int size)
 {
 	U8 crc7_accum = 0;
-	int i;
 
-	for (i=0;  i < size; i++) {
+	for (unsigned int i = 0; i < size; i++) {
 		crc7_accum = crc7_table[(crc7_accum << 1) ^ data[i]];
 	}
 	return crc7_accum;

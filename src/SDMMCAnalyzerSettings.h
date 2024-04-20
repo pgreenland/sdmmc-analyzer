@@ -10,10 +10,10 @@ enum SDMMCProtocol {
 };
 
 enum SDMMCBusWidth {
-    BUS_WIDTH_0,
-    BUS_WIDTH_1,
-    BUS_WIDTH_4,
-    BUS_WIDTH_8
+    BUS_WIDTH_0 = 0,
+    BUS_WIDTH_1 = 1,
+    BUS_WIDTH_4 = 4,
+    BUS_WIDTH_8 = 8,
 };
 
 enum SDMMCSampleEdge {

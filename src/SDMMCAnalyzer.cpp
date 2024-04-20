@@ -43,37 +43,40 @@ void SDMMCAnalyzer::WorkerThread()
 		mData7 = GetAnalyzerChannelData(mSettings.mDataChannel7);
 	}
 
-	while (true) {
+	// Init CMD & DATA state machines
+	CommandReadState cmdState = {};
+	DataReadState dataState = {};
 
-		ReportProgress(mClock->GetSampleNumber());
-		CheckIfThreadShouldExit();
-		// Skip to next command
-		AdvanceToNextCommand();
+	// Frame objects used by state machine functions - can't be created
+	// there (lifetime)
+	Frame respFrame;
+	Frame dataFrame;
+
+	// Skip to next command
+	AdvanceToNextCommand();
+	AdvanceToNextClock();
+
+	while (true) {
+		ReadCommandBit(&cmdState, &dataState, &respFrame);
+		ReadDataBit(&dataState, &dataFrame);
 		AdvanceToNextClock();
 
-		// Frame objects used by state machine functions - can't be created
-		// there (lifetime)
-		Frame respFrame;
-		Frame dataFrame;
-
-		// Init CMD & DATA state machines
-		CommandReadState cmdState = {
-			CMD_INIT, 0, 0, 0, // CMD counters & state
-			// RESP counters & state (will be set after CMD has been read)
-			MMC_RSP_NONE, 0, 0, 0, 0, 0, 0};
-		DataReadState dataState = {DATA_NOTSTARTED, 0, 0, 0, 0, false};
-
-		while (cmdState.phase != CMD_ERROR && dataState.phase != DATA_ERROR &&
-				cmdState.phase != CMD_INTERRUPT &&
-				!(cmdState.phase == CMD_END &&
-					(dataState.phase == DATA_END ||
-					 dataState.phase == DATA_NOTSTARTED))) {
-			// CMD state machine may start DATA state machine => ref needed
-			ReadCommandBit(&cmdState, &dataState, &respFrame);
-			ReadDataBit(&dataState, &dataFrame);
-			AdvanceToNextClock();
+		switch (cmdState.phase) {
+			case CMD_ERROR:
+			case CMD_END:
+				cmdState = {};
+				goto phase_finished;
 		}
-		mResults->CommitResults();
+		switch (dataState.phase) {
+			case DATA_ERROR:
+			case DATA_END:
+				dataState = {};
+phase_finished:
+				ReportProgress(mClock->GetSampleNumber());
+				mResults->CommitResults();
+		}
+
+		CheckIfThreadShouldExit();
 	}
 }
 
@@ -154,7 +157,7 @@ void SDMMCAnalyzer::AdvanceToNextCommand() {
 }
 
 void SDMMCAnalyzer::ReadCommandBit(CommandReadState *state, DataReadState
-		*dataState, struct Frame *frame) {
+		*dataState, Frame *frame) {
 	switch(state->phase) {
 		case CMD_INIT:
 			if (mCommand->GetBitState() == BIT_LOW) {
@@ -216,8 +219,7 @@ void SDMMCAnalyzer::ReadCommandBit(CommandReadState *state, DataReadState
 			return;
 		case CMD_STOP:
 			{
-                        	mResults->AddMarker(mClock->GetSampleNumber(),
-                                              AnalyzerResults::Stop, mSettings.mCommandChannel);
+				mResults->AddMarker(mClock->GetSampleNumber(), AnalyzerResults::Stop, mSettings.mCommandChannel);
 				struct MMCResponse response = SDMMCHelpers::MMCCommandResponse(state->cmdindex);
 				if (response.mType != MMC_RSP_NONE) {
 					state->phase = RESP_INIT;
@@ -328,23 +330,14 @@ void SDMMCAnalyzer::ReadCommandBit(CommandReadState *state, DataReadState
 			/* stop bit */
 			mResults->AddMarker(mClock->GetSampleNumber(), AnalyzerResults::Stop, mSettings.mCommandChannel);
 			if (state->cmdindex == 12) {  // STOP_TRANSMISSION
-				state->phase = CMD_INTERRUPT;
+				dataState->phase = DATA_INTERRUPTED;
+				state->phase = CMD_END;
 				return;
 			}
 			if (dataState->hasSeveralDataBlocks) {
 				// READ MULTIPLE BLOCK / WRITE MULTIPLE BLOCK: wait for another
 				// command while data is being transmitted
-				state->phase = CMD_INIT;
-				// Reset state
-				state->cmd_idx_cnt = 0;
-				state->cmd_arg_cnt = 0;
-				state->cmd_crc_cnt = 0;
-				state->responseType = MMC_RSP_NONE;
-				state->timeout = 0;
-				state->cmdindex = 0;
-				state->resp_data_bits = 0;
-				state->resp_ignore_cnt = 0;
-				state->resp_data_cnt = 0;
+				*state = { CMD_INIT };
 			} else {
 				state->phase = CMD_END;
 			}
@@ -357,31 +350,13 @@ void SDMMCAnalyzer::ReadCommandBit(CommandReadState *state, DataReadState
 
 }
 
-void SDMMCAnalyzer::ReadDataBit(DataReadState *state, struct Frame *frame) {
+void SDMMCAnalyzer::ReadDataBit(DataReadState *state, Frame *frame) {
 	switch(state->phase) {
 		case DATA_INIT:
-			if (mData0->GetBitState() == BIT_LOW) {
-				/* other data lines must be at 0, too
-				 * (depending on bus width (?)) */
-				if (	/* BusWidth=4 or 8 */
-						mSettings.mBusWidth != BUS_WIDTH_1 &&
-						(mData1->GetBitState() != BIT_LOW ||
-						 mData2->GetBitState() != BIT_LOW ||
-						 mData3->GetBitState() != BIT_LOW) ||
-						/* BusWidth=8 */
-						mSettings.mBusWidth == BUS_WIDTH_8 &&
-						(mData4->GetBitState() != BIT_LOW ||
-						 mData5->GetBitState() != BIT_LOW ||
-						 mData6->GetBitState() != BIT_LOW ||
-						 mData7->GetBitState() != BIT_LOW)) {
-					mResults->AddMarker(mClock->GetSampleNumber(),
-							AnalyzerResults::X, mSettings.mDataChannel0);
-					state->phase = DATA_ERROR;
-				} else {
-					mResults->AddMarker(mClock->GetSampleNumber(),
-							AnalyzerResults::Start, mSettings.mDataChannel0);
-					state->phase = DATA_DATA;
-				}
+			if (!getDataBits()) {
+				mResults->AddMarker(mClock->GetSampleNumber(),
+						AnalyzerResults::Start, mSettings.mDataChannel0);
+				state->phase = DATA_DATA;
 			}
 			return;
 		case DATA_DATA:
@@ -531,14 +506,40 @@ void SDMMCAnalyzer::ReadDataBit(DataReadState *state, struct Frame *frame) {
 				state->phase = DATA_END;
 			}
 			return;
-			/* this method does not gets called for NOTSTARTED, END and ERROR
-			 * phases */
+		case DATA_INTERRUPTED:
+			if (getDataBits() == (1 << mSettings.mBusWidth) - 1) {
+				state->phase = DATA_END;
+				mResults->AddMarker(mClock->GetSampleNumber(),
+					AnalyzerResults::Stop, mSettings.mDataChannel0);
+			}
+			return;
 		case DATA_NOTSTARTED:
 		case DATA_ERROR:
 		case DATA_END:
 			return;
 	}
 }
+U8 SDMMCAnalyzer::getDataBits() {
+		U8 bits = 0;
+		switch (mSettings.mBusWidth) {
+			case BUS_WIDTH_8:
+				bits = (bits << 1) | (mData7->GetBitState() != BIT_LOW);
+				bits = (bits << 1) | (mData6->GetBitState() != BIT_LOW);
+				bits = (bits << 1) | (mData5->GetBitState() != BIT_LOW);
+				bits = (bits << 1) | (mData4->GetBitState() != BIT_LOW);
+			case BUS_WIDTH_4:
+				bits = (bits << 1) | (mData3->GetBitState() != BIT_LOW);
+				bits = (bits << 1) | (mData2->GetBitState() != BIT_LOW);
+				bits = (bits << 1) | (mData1->GetBitState() != BIT_LOW);
+			case BUS_WIDTH_1:
+				bits = (bits << 1) | (mData0->GetBitState() != BIT_LOW);
+			case BUS_WIDTH_0:
+			default:
+				break;
+		}
+		return bits;
+	}
+
 /*
  * loader hooks
  */

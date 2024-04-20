@@ -17,7 +17,7 @@ SDMMCAnalyzerResults::~SDMMCAnalyzerResults()
 {
 }
 
-static const char* cmd_abbrev_from_number(unsigned int cmd_number)
+static const char* cmd_abbrev_from_number(U64 cmd_number)
 {
 	if (cmd_number >= 43 && cmd_number <= 47) return "[reserved]";
 	switch (cmd_number) {
@@ -131,7 +131,7 @@ case FRAMETYPE_COMMAND:
 			AnalyzerHelpers::GetNumberString(rca, display_base, 32, str_rca, sizeof(str_rca));
 			AnalyzerHelpers::GetNumberString(stuff, display_base, 32, str_stuff, sizeof(str_stuff));
 
-			sprintf(str_buf, ", arg=%s, rca=%s, stuff=%s", str_arg, str_rca, str_stuff);
+			sprintf_s(str_buf, ", arg=%s, rca=%s, stuff=%s", str_arg, str_rca, str_stuff);
 			break;
         }
 		case 4: //SET_DSR
@@ -145,7 +145,7 @@ case FRAMETYPE_COMMAND:
 			AnalyzerHelpers::GetNumberString(dsr, display_base, 32, str_dsr, sizeof(str_dsr));
 			AnalyzerHelpers::GetNumberString(stuff, display_base, 32, str_stuff, sizeof(str_stuff));
 
-			sprintf(str_buf, ", arg=%s, dsr=%s, stuff=%s", str_arg, str_dsr, str_stuff);
+			sprintf_s(str_buf, ", arg=%s, dsr=%s, stuff=%s", str_arg, str_dsr, str_stuff);
 			break;}
 		case 5: //SLEEP_AWAKE
             {
@@ -161,7 +161,7 @@ case FRAMETYPE_COMMAND:
 			AnalyzerHelpers::GetNumberString(sleepawake, display_base, 4, str_sleepawake, sizeof(str_sleepawake));
 			AnalyzerHelpers::GetNumberString(stuff, display_base, 32, str_stuff, sizeof(str_stuff));
 
-			sprintf(str_buf, ", arg=%s, rca=%s, sleepawake=%s, stuff=%s", str_arg, str_rca, str_sleepawake, str_stuff);
+			sprintf_s(str_buf, ", arg=%s, rca=%s, sleepawake=%s, stuff=%s", str_arg, str_rca, str_sleepawake, str_stuff);
 			break;}
 		case 6: //SWITCH
             {
@@ -180,7 +180,7 @@ case FRAMETYPE_COMMAND:
 			AnalyzerHelpers::GetNumberString(value, display_base, 32, str_value, sizeof(str_value));
 			AnalyzerHelpers::GetNumberString(cmd, display_base, 4, str_cmd2, sizeof(str_cmd2));
 
-			sprintf(str_buf, ", arg=%s, access=%s, index=%s, value=%s, cmd=%s", str_arg, str_access, str_index, str_value, str_cmd2);
+			sprintf_s(str_buf, ", arg=%s, access=%s, index=%s, value=%s, cmd=%s", str_arg, str_access, str_index, str_value, str_cmd2);
 
 			AddResultString("CMD", str_cmd, str_buf);
 			break;}
@@ -199,7 +199,7 @@ case FRAMETYPE_COMMAND:
 			AnalyzerHelpers::GetNumberString(stuff, display_base, 32, str_stuff, sizeof(str_stuff));
 			AnalyzerHelpers::GetNumberString(hpi, display_base, 4, str_hpi, sizeof(str_hpi));
 
-			sprintf(str_buf, ", arg=%s, rca=%s, stuff=%s, hpi=%s", str_arg, str_rca, str_stuff, str_hpi);
+			sprintf_s(str_buf, ", arg=%s, rca=%s, stuff=%s, hpi=%s", str_arg, str_rca, str_stuff, str_hpi);
 			break;}
 		case 23: //SET_BLOCK_COUNT
             {
@@ -226,7 +226,7 @@ case FRAMETYPE_COMMAND:
 			if (p_zero == 0 && p_one == 1 && p_zero2 == 0) { // seems packed
 				AnalyzerHelpers::GetNumberString(num_blocks2, display_base, 32, str_num_blocks, sizeof(str_num_blocks));
 
-				sprintf(str_buf, ", arg=%s, num_blocks=%s", str_arg, str_num_blocks);
+				sprintf_s(str_buf, ", arg=%s, num_blocks=%s", str_arg, str_num_blocks);
 
 			} else { // has to be default then
 				AnalyzerHelpers::GetNumberString(rwritereq, display_base, 4, str_rwritereq, sizeof(str_rwritereq));
@@ -235,7 +235,7 @@ case FRAMETYPE_COMMAND:
 				AnalyzerHelpers::GetNumberString(forced, display_base, 4, str_forced, sizeof(str_forced));
 				AnalyzerHelpers::GetNumberString(num_blocks, display_base, 4, str_num_blocks, sizeof(str_num_blocks));
 
-				sprintf(str_buf, ", arg=%s, rwritereq=%s, tagreq=%s, ctx_id=%s, forced=%s, num_blocks=%s", str_arg, str_rwritereq, str_tagreq, str_ctx_id, str_forced, num_blocks);
+				sprintf_s(str_buf, ", arg=%s, rwritereq=%s, tagreq=%s, ctx_id=%s, forced=%s, num_blocks=%i", str_arg, str_rwritereq, str_tagreq, str_ctx_id, str_forced, num_blocks);
 			}
 			break;}
 		case 38: //ERASE
@@ -257,7 +257,7 @@ case FRAMETYPE_COMMAND:
 			AnalyzerHelpers::GetNumberString(discard_en, display_base, 4, str_discard_en, sizeof(str_discard_en));
 			AnalyzerHelpers::GetNumberString(ident_writeblocks, display_base, 4, str_ident_writeblocks, sizeof(str_ident_writeblocks));
 
-			sprintf(str_buf, ", arg=%s, securereq=%s, forcegarbage=%s, discard_en=%s, ident_writeblocks=%s", str_arg, str_securereq, str_forcegarb, str_discard_en, str_ident_writeblocks);
+			sprintf_s(str_buf, ", arg=%s, securereq=%s, forcegarbage=%s, discard_en=%s, ident_writeblocks=%s", str_arg, str_securereq, str_forcegarb, str_discard_en, str_ident_writeblocks);
 			break;}
 		case 39: //FAST_IO
             {
@@ -276,7 +276,7 @@ case FRAMETYPE_COMMAND:
 			AnalyzerHelpers::GetNumberString(reg_addr, display_base, 32, str_reg_addr, sizeof(str_reg_addr));
 			AnalyzerHelpers::GetNumberString(reg_data, display_base, 32, str_reg_data, sizeof(str_reg_data));
 
-			sprintf(str_buf, ", arg=%s, rca=%s, reg_wflag=%s, reg_addr=%s, reg_data=%s", str_arg, str_rca, str_reg_wflag, str_reg_addr, str_reg_data);
+			sprintf_s(str_buf, ", arg=%s, rca=%s, reg_wflag=%s, reg_addr=%s, reg_data=%s", str_arg, str_rca, str_reg_wflag, str_reg_addr, str_reg_data);
 			break;}
 		case 53: //PROTOCOL_RD
 		case 54: //PROTOCOL_WR
@@ -293,7 +293,7 @@ case FRAMETYPE_COMMAND:
 			AnalyzerHelpers::GetNumberString(sec_prot, display_base, 32, str_sec_prot, sizeof(str_sec_prot));
 			AnalyzerHelpers::GetNumberString(reserv, display_base, 32, str_reserv, sizeof(str_reserv));
 
-			sprintf(str_buf, ", arg=%s, sec_specific=%s, sec_protocol=%s, reserv=%s", str_arg, str_sec_spec, str_sec_prot, str_reserv);
+			sprintf_s(str_buf, ", arg=%s, sec_specific=%s, sec_protocol=%s, reserv=%s", str_arg, str_sec_spec, str_sec_prot, str_reserv);
 			break;}
 		case 56: //GEN_CMD
             {
@@ -306,7 +306,7 @@ case FRAMETYPE_COMMAND:
 			AnalyzerHelpers::GetNumberString(stuff, display_base, 32, str_stuff, sizeof(str_stuff));
 			AnalyzerHelpers::GetNumberString(rd_wr, display_base, 4, str_rd_wr, sizeof(str_rd_wr));
 
-			sprintf(str_buf, ", arg=%s, stuff=%s, rd_wr1=%s", str_arg, str_stuff, str_rd_wr);
+			sprintf_s(str_buf, ", arg=%s, stuff=%s, rd_wr1=%s", str_arg, str_stuff, str_rd_wr);
 			break;}
 		}
 	}
@@ -747,7 +747,6 @@ void SDMMCAnalyzerResults::GenerateExportFile(const char* file, DisplayBase disp
 
 			Frame dFrame = GetFrame(i-1);
 			char str_crc[8];
-			char str_c[128];
 
 			U8 data[6];
 			U8 calcCrc;
@@ -756,12 +755,12 @@ void SDMMCAnalyzerResults::GenerateExportFile(const char* file, DisplayBase disp
 			switch (dFrame.mType) {
 			case FRAMETYPE_COMMAND:
 			{
-				lastCmd = dFrame.mData1;
+				lastCmd = (U8)(dFrame.mData1);
 				data[0] = 0x40 + (U8)(dFrame.mData1);
-				data[1] = dFrame.mData2 >> 24;
-				data[2] = dFrame.mData2 >> 16;
-				data[3] = dFrame.mData2 >>  8;
-				data[4] = dFrame.mData2;
+				data[1] = (U8)(dFrame.mData2 >> 24);
+				data[2] = (U8)(dFrame.mData2 >> 16);
+				data[3] = (U8)(dFrame.mData2 >>  8);
+				data[4] = (U8)(dFrame.mData2);
 
 				calcCrc = SDMMCHelpers::crc7(data, 5);
 				break;
@@ -774,10 +773,10 @@ void SDMMCAnalyzerResults::GenerateExportFile(const char* file, DisplayBase disp
 				case MMC_RSP_R4:
 				case MMC_RSP_R5:
 					data[0] = (U8)(lastCmd);
-					data[1] = dFrame.mData1 >> 24;
-					data[2] = dFrame.mData1 >> 16;
-					data[3] = dFrame.mData1 >>  8;
-					data[4] = dFrame.mData1;
+					data[1] = (U8)(dFrame.mData1 >> 24);
+					data[2] = (U8)(dFrame.mData1 >> 16);
+					data[3] = (U8)(dFrame.mData1 >>  8);
+					data[4] = (U8)(dFrame.mData1);
 
 					calcCrc = SDMMCHelpers::crc7(data, 5);
 					break;

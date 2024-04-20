@@ -27,8 +27,8 @@ protected:
 	void AdvanceToNextClock();
 	void AdvanceToNextCommand();
 	void ReadCommandBit(CommandReadState *state, DataReadState *dataState,
-			struct Frame *respFrame);
-	void ReadDataBit(DataReadState *state, struct Frame *dataFrame);
+			Frame *respFrame);
+	void ReadDataBit(DataReadState *state, Frame *dataFrame);
 
 protected:
 	SDMMCAnalyzerSettings mSettings;
@@ -47,6 +47,8 @@ protected:
 	AnalyzerChannelData *mData5;
 	AnalyzerChannelData *mData6;
 	AnalyzerChannelData *mData7;
+
+	U8 getDataBits();
 };
 
 extern "C" ANALYZER_EXPORT const char* __cdecl GetAnalyzerName();

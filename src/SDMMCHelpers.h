@@ -28,7 +28,6 @@ enum CommandReadPhase {
 	RESP_STOP,
 	CMD_ERROR,
 	CMD_END,
-	CMD_INTERRUPT // same as END, but indicates that data read must stop now
 };
 
 enum DataReadPhase {
@@ -43,6 +42,7 @@ enum DataReadPhase {
 	DATA_BUSY,
 	DATA_BUSY_END,
 	DATA_ERROR, // Decoding error
+	DATA_INTERRUPTED,
 	DATA_END
 };
 
@@ -90,8 +90,8 @@ public:
 
 public:
 	static U8 crc7(const U8 *data, unsigned int size);
-	static struct MMCResponse MMCCommandResponse(unsigned int index);
-	static const char * MMCCommandDescription(unsigned int index, unsigned int args);
+	static struct MMCResponse MMCCommandResponse(U64 index);
+	static const char * MMCCommandDescription(U64 index, U64 args);
 
 private:
 	static U8 __crc7(U8 crc, U8 data);
